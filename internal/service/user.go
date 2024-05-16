@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -26,32 +27,36 @@ func newUserService(repo *repo.Repo, validator *validator.Validate, cfg *cfg.Cfg
 
 func (u *UserService) RegisterIT(ctx context.Context, body dto.ReqRegister) (dto.ResRegister, error) {
 	res := dto.ResRegister{}
+	var nip string
 
 	err := u.validator.Struct(body)
 	if err != nil {
+		fmt.Printf("error: %v\n", err)
 		return res, ierr.ErrBadRequest
 	}
 
-	// validate NIP just number
-	if _, err := strconv.Atoi(body.NIP); err != nil {
+	// convert int to string
+	nip = strconv.Itoa(body.NIP)
+	// validate nip must 13 characters
+	if len(nip) != 13 {
 		return res, ierr.ErrBadRequest
 	}
 	// - first until third digit, should start with `615`
-	if body.NIP[:3] != "615" {
+	if nip[:3] != "615" {
 		return res, ierr.ErrBadRequest
 	}
 	// - the fourth digit, if it's male, fill it with `1`, else `2`
-	if body.NIP[3] != '1' && body.NIP[3] != '2' {
+	if nip[3] != '1' && nip[3] != '2' {
 		return res, ierr.ErrBadRequest
 	}
 	// - the fifth and ninth digit, fill it with a year, starts from `2000` till current year
 	currentYear := time.Now().Year()
-	year, err := strconv.Atoi(body.NIP[4:8])
+	year, err := strconv.Atoi(nip[4:8])
 	if err != nil || year < 2000 || year > currentYear {
 		return res, ierr.ErrBadRequest
 	}
 	// - the tenth and twelfth, fill it with month, starts from `01` till `12`
-	month, err := strconv.Atoi(body.NIP[8:10])
+	month, err := strconv.Atoi(nip[8:10])
 	if err != nil || month < 1 || month > 12 {
 		return res, ierr.ErrBadRequest
 	}
@@ -77,32 +82,31 @@ func (u *UserService) RegisterIT(ctx context.Context, body dto.ReqRegister) (dto
 
 func (u *UserService) RegisterNurse(ctx context.Context, body dto.ReqRegisterNurse) (dto.ResRegisterNurse, error) {
 	res := dto.ResRegisterNurse{}
+	var nip string
 
 	err := u.validator.Struct(body)
 	if err != nil {
 		return res, ierr.ErrBadRequest
 	}
 
-	// validate NIP just number
-	if _, err := strconv.Atoi(body.NIP); err != nil {
-		return res, ierr.ErrBadRequest
-	}
+	// convert int to string
+	nip = strconv.Itoa(body.NIP)
 	// - first until third digit, should start with `303`
-	if body.NIP[:3] != "303" {
+	if nip[:3] != "303" {
 		return res, ierr.ErrBadRequest
 	}
 	// - the fourth digit, if it's male, fill it with `1`, else `2`
-	if body.NIP[3] != '1' && body.NIP[3] != '2' {
+	if nip[3] != '1' && nip[3] != '2' {
 		return res, ierr.ErrBadRequest
 	}
 	// - the fifth and ninth digit, fill it with a year, starts from `2000` till current year
 	currentYear := time.Now().Year()
-	year, err := strconv.Atoi(body.NIP[4:8])
+	year, err := strconv.Atoi(nip[4:8])
 	if err != nil || year < 2000 || year > currentYear {
 		return res, ierr.ErrBadRequest
 	}
 	// - the tenth and twelfth, fill it with month, starts from `01` till `12`
-	month, err := strconv.Atoi(body.NIP[8:10])
+	month, err := strconv.Atoi(nip[8:10])
 	if err != nil || month < 1 || month > 12 {
 		return res, ierr.ErrBadRequest
 	}
@@ -122,13 +126,17 @@ func (u *UserService) RegisterNurse(ctx context.Context, body dto.ReqRegisterNur
 
 func (u *UserService) LoginIT(ctx context.Context, body dto.ReqLogin) (dto.ResLogin, error) {
 	res := dto.ResLogin{}
+	var nip string
 
 	err := u.validator.Struct(body)
 	if err != nil {
 		return res, ierr.ErrBadRequest
 	}
 
-	user, err := u.repo.User.GetByNIP(ctx, body.NIP)
+	// convert int to string
+	nip = strconv.Itoa(body.NIP)
+
+	user, err := u.repo.User.GetByNIP(ctx, nip)
 	if err != nil {
 		return res, err
 	}
@@ -146,7 +154,10 @@ func (u *UserService) LoginIT(ctx context.Context, body dto.ReqLogin) (dto.ResLo
 	}
 
 	res.UserID = user.ID
-	res.NIP = user.NIP
+	res.NIP, err = strconv.Atoi(user.NIP)
+	if err != nil {
+		return res, err
+	}
 	res.Name = user.Name
 	res.AccessToken = token
 
@@ -155,13 +166,17 @@ func (u *UserService) LoginIT(ctx context.Context, body dto.ReqLogin) (dto.ResLo
 
 func (u *UserService) LoginNurse(ctx context.Context, body dto.ReqLogin) (dto.ResLogin, error) {
 	res := dto.ResLogin{}
+	var nip string
 
 	err := u.validator.Struct(body)
 	if err != nil {
 		return res, ierr.ErrBadRequest
 	}
 
-	user, err := u.repo.User.GetByNIP(ctx, body.NIP)
+	// convert int to string
+	nip = strconv.Itoa(body.NIP)
+
+	user, err := u.repo.User.GetByNIP(ctx, nip)
 	if err != nil {
 		return res, err
 	}
@@ -179,7 +194,10 @@ func (u *UserService) LoginNurse(ctx context.Context, body dto.ReqLogin) (dto.Re
 	}
 
 	res.UserID = user.ID
-	res.NIP = user.NIP
+	res.NIP, err = strconv.Atoi(user.NIP)
+	if err != nil {
+		return res, err
+	}
 	res.Name = user.Name
 	res.AccessToken = token
 

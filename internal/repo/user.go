@@ -153,9 +153,9 @@ func (u *userRepo) GetUser(ctx context.Context, param dto.ParamGetUser, sub stri
 }
 
 func (u *userRepo) UpdateNurse(ctx context.Context, body dto.ReqUpdateNurse, sub string) error {
-	q := `UPDATE users SET name = $1, password = $2 WHERE id = $3`
+	q := `UPDATE users SET nip = $1, name = $2 WHERE id = $3`
 	_, err := u.conn.Exec(ctx, q,
-		body.Name, body.Password, sub)
+		body.NIP, body.Name, sub)
 
 	if err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {

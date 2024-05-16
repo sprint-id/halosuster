@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -26,6 +27,12 @@ func (h *userHandler) RegisterIT(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "failed to parse request body", http.StatusBadRequest)
+		return
+	}
+
+	// Validate the length of NIP
+	if len(strconv.Itoa(req.NIP)) != 13 {
+		http.Error(w, "NIP must be 13 digits long", http.StatusBadRequest)
 		return
 	}
 
@@ -173,6 +180,8 @@ func (h *userHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *userHandler) UpdateNurse(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("userId")
+	fmt.Printf("id: %s\n", id)
 	var req dto.ReqUpdateNurse
 
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -181,13 +190,7 @@ func (h *userHandler) UpdateNurse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _, err := jwtauth.FromContext(r.Context())
-	if err != nil {
-		http.Error(w, "failed to get token from request", http.StatusBadRequest)
-		return
-	}
-
-	err = h.userSvc.UpdateNurse(r.Context(), req, token.Subject())
+	err = h.userSvc.UpdateNurse(r.Context(), req, id)
 	if err != nil {
 		code, msg := ierr.TranslateError(err)
 		http.Error(w, msg, code)
@@ -198,7 +201,9 @@ func (h *userHandler) UpdateNurse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *userHandler) DeleteNurse(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("userId")
+	// id := r.PathValue("userId")
+	id := r.URL.Query().Get("userId")
+	fmt.Printf("id: %s\n", id)
 
 	err := h.userSvc.DeleteNurse(r.Context(), id)
 	if err != nil {
@@ -211,7 +216,9 @@ func (h *userHandler) DeleteNurse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *userHandler) AccessNurse(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("userId")
+	// id := r.PathValue("userId")
+	id := r.URL.Query().Get("userId")
+	fmt.Printf("id: %s\n", id)
 	var req dto.ReqAccessNurse
 
 	err := json.NewDecoder(r.Body).Decode(&req)

@@ -1,25 +1,27 @@
 package dto
 
 import (
+	"strconv"
+
 	"github.com/sprint-id/eniqilo-server/internal/entity"
 	"github.com/sprint-id/eniqilo-server/pkg/auth"
 )
 
 type (
 	ReqRegister struct {
-		NIP      string `json:"nip" validate:"required,len=13"`
+		NIP      int    `json:"nip" validate:"required"`
 		Name     string `json:"name" validate:"required,min=5,max=50"`
 		Password string `json:"password" validate:"required,min=5,max=33"`
 	}
 
 	ReqRegisterNurse struct {
-		NIP                 string `json:"nip" validate:"required,len=13"`
+		NIP                 int    `json:"nip" validate:"required"`
 		Name                string `json:"name" validate:"required,min=5,max=50"`
 		IdentityCardScanImg string `json:"identityCardScanImg" validate:"required,url"`
 	}
 
 	ReqLogin struct {
-		NIP      string `json:"nip" validate:"required,len=13"`
+		NIP      int    `json:"nip" validate:"required"`
 		Password string `json:"password" validate:"required,min=5,max=33"`
 	}
 
@@ -35,9 +37,8 @@ type (
 	}
 
 	ReqUpdateNurse struct {
-		NIP      string `json:"nip" validate:"required,len=13"`
-		Name     string `json:"name" validate:"required,min=5,max=50"`
-		Password string `json:"password" validate:"required,min=5,max=33"`
+		NIP  int    `json:"nip" validate:"required"`
+		Name string `json:"name" validate:"required,min=5,max=50"`
 	}
 
 	ReqAccessNurse struct {
@@ -46,27 +47,27 @@ type (
 
 	ResRegister struct {
 		UserID      string `json:"userId"`
-		NIP         string `json:"nip,omitempty"`
+		NIP         int    `json:"nip,omitempty"`
 		Name        string `json:"name"`
 		AccessToken string `json:"accessToken"`
 	}
 
 	ResRegisterNurse struct {
 		UserID string `json:"userId"`
-		NIP    string `json:"nip,omitempty"`
+		NIP    int    `json:"nip,omitempty"`
 		Name   string `json:"name"`
 	}
 
 	ResLogin struct {
 		UserID      string `json:"userId"`
-		NIP         string `json:"nip,omitempty"`
+		NIP         int    `json:"nip,omitempty"`
 		Name        string `json:"name"`
 		AccessToken string `json:"accessToken"`
 	}
 
 	ResGetUser struct {
 		UserID    string `json:"userId"`
-		NIP       string `json:"nip,omitempty"`
+		NIP       int    `json:"nip,omitempty"`
 		Name      string `json:"name"`
 		CreatedAt string `json:"createdAt"`
 	}
@@ -78,9 +79,9 @@ type (
 )
 
 func (d *ReqRegister) ToUserEntity(cryptCost int) entity.User {
-	return entity.User{Name: d.Name, Password: auth.HashPassword(d.Password, cryptCost), NIP: d.NIP}
+	return entity.User{Name: d.Name, Password: auth.HashPassword(d.Password, cryptCost), NIP: strconv.Itoa(d.NIP)}
 }
 
 func (d *ReqRegisterNurse) ToNurseEntity(cryptCost int) entity.User {
-	return entity.User{Name: d.Name, Password: auth.HashPassword("password", cryptCost), NIP: d.NIP}
+	return entity.User{Name: d.Name, Password: auth.HashPassword("password", cryptCost), NIP: strconv.Itoa(d.NIP)}
 }
