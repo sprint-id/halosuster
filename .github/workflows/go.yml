@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: |
         pwd
-        go build -o main ./cmd/main.go
+        GOARCH=amd64 GOOS=linux go build -v -o main cmd/main.go
         ls -al
 
   docker:

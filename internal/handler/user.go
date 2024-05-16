@@ -198,7 +198,7 @@ func (h *userHandler) UpdateNurse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *userHandler) DeleteNurse(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id := r.PathValue("userId")
 
 	err := h.userSvc.DeleteNurse(r.Context(), id)
 	if err != nil {
