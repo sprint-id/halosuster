@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"strconv"
+
 	"github.com/sprint-id/eniqilo-server/internal/entity"
 )
 
@@ -12,7 +14,7 @@ import (
 
 type (
 	ReqAddRecord struct {
-		IdentityNumber string `json:"identityNumber" validate:"required,len=16"`
+		IdentityNumber int    `json:"identityNumber" validate:"required"`
 		Symptoms       string `json:"symptoms" validate:"required,min=1,max=2000"`
 		Medications    string `json:"medications" validate:"required,min=1,max=2000"`
 	}
@@ -37,7 +39,7 @@ type (
 	}
 
 	ResIdentityDetail struct {
-		IdentityNumber      string `json:"identityNumber"`
+		IdentityNumber      int    `json:"identityNumber"`
 		PhoneNumber         string `json:"phoneNumber"`
 		Name                string `json:"name"`
 		BirthDate           string `json:"birthDate"`
@@ -54,7 +56,7 @@ type (
 
 func (d *ReqAddRecord) ToRecordEntity(userId string) entity.Record {
 	return entity.Record{
-		IdentityNumber: d.IdentityNumber,
+		IdentityNumber: strconv.Itoa(d.IdentityNumber),
 		Symptoms:       d.Symptoms,
 		Medications:    d.Medications,
 		UserID:         userId,

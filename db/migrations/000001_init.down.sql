@@ -4,7 +4,7 @@ DROP INDEX IF EXISTS idx_patients_id;
 DROP INDEX IF EXISTS idx_patients_user_id;
 DROP INDEX IF EXISTS idx_medical_records_id;
 DROP INDEX IF EXISTS idx_medical_records_user_id;
-DROP INDEX IF EXISTS idx_medical_records_patient_id;
+DROP INDEX IF EXISTS idx_medical_records_patient_identifier;
 
 DROP TABLE IF EXISTS medical_records;
 

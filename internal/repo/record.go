@@ -30,12 +30,11 @@ func newRecordRepo(conn *pgxpool.Pool) *recordRepo {
 
 func (cr *recordRepo) AddRecord(ctx context.Context, sub string, record entity.Record) error {
 	// add record
-	q := `INSERT INTO medical_records (user_id, patient_id, symptoms, medicaitons, created_at)
-	VALUES ( $1, $2, $3, $4, EXTRACT(EPOCH FROM now())::bigint) RETURNING id, created_at`
+	q := `INSERT INTO medical_records (user_id, patient_identifier, symptoms, medications, created_at)
+	VALUES ( $1, $2, $3, $4, EXTRACT(EPOCH FROM now())::bigint) RETURNING id`
 
 	var id string
-	var createdAt int64
-	err := cr.conn.QueryRow(ctx, q, sub, record.ID, record.Symptoms, record.Medications).Scan(&id, &createdAt)
+	err := cr.conn.QueryRow(ctx, q, sub, record.IdentityNumber, record.Symptoms, record.Medications).Scan(&id)
 	if err != nil {
 		return err
 	}

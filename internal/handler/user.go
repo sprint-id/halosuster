@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/sprint-id/eniqilo-server/internal/dto"
@@ -27,12 +28,6 @@ func (h *userHandler) RegisterIT(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "failed to parse request body", http.StatusBadRequest)
-		return
-	}
-
-	// Validate the length of NIP
-	if len(strconv.Itoa(req.NIP)) != 13 {
-		http.Error(w, "NIP must be 13 digits long", http.StatusBadRequest)
 		return
 	}
 
@@ -217,7 +212,7 @@ func (h *userHandler) DeleteNurse(w http.ResponseWriter, r *http.Request) {
 
 func (h *userHandler) AccessNurse(w http.ResponseWriter, r *http.Request) {
 	// id := r.PathValue("userId")
-	id := r.URL.Query().Get("userId")
+	id := strings.Split(r.URL.Path, "/")[4]
 	fmt.Printf("id: %s\n", id)
 	var req dto.ReqAccessNurse
 

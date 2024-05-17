@@ -1,6 +1,10 @@
 package dto
 
-import "github.com/sprint-id/eniqilo-server/internal/entity"
+import (
+	"strconv"
+
+	"github.com/sprint-id/eniqilo-server/internal/entity"
+)
 
 // {
 // 	"identityNumber": 123123, // not null, should be 16 digit
@@ -18,7 +22,7 @@ import "github.com/sprint-id/eniqilo-server/internal/entity"
 
 type (
 	ReqCreatePatient struct {
-		IdentityNumber      string `json:"identityNumber" validate:"required,len=16"`
+		IdentityNumber      int    `json:"identityNumber" validate:"required"`
 		PhoneNumber         string `json:"phoneNumber" validate:"required,min=10,max=15"`
 		Name                string `json:"name" validate:"required,min=3,max=30"`
 		BirthDate           string `json:"birthDate" validate:"required"`
@@ -36,7 +40,7 @@ type (
 	}
 
 	ResGetPatient struct {
-		IdentityNumber string `json:"identityNumber"`
+		IdentityNumber int    `json:"identityNumber"`
 		PhoneNumber    string `json:"phoneNumber"`
 		Name           string `json:"name"`
 		BirthDate      string `json:"birthDate"`
@@ -48,7 +52,7 @@ type (
 // ToEntity to convert dto to entity
 func (d *ReqCreatePatient) ToPatientEntity() entity.Patient {
 	return entity.Patient{
-		IdentityNumber:      d.IdentityNumber,
+		IdentityNumber:      strconv.Itoa(d.IdentityNumber),
 		PhoneNumber:         d.PhoneNumber,
 		Name:                d.Name,
 		BirthDate:           d.BirthDate,

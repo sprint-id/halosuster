@@ -35,6 +35,7 @@ func (h *patientHandler) CreatePatient(w http.ResponseWriter, r *http.Request) {
 	// Decode request body into the jsonData map
 	err := json.NewDecoder(r.Body).Decode(&jsonData)
 	if err != nil {
+		fmt.Printf("error Decode: %v\n", err)
 		http.Error(w, "failed to parse request body", http.StatusBadRequest)
 		return
 	}
@@ -51,11 +52,13 @@ func (h *patientHandler) CreatePatient(w http.ResponseWriter, r *http.Request) {
 	// Convert the jsonData map into the req struct
 	bytes, err := json.Marshal(jsonData)
 	if err != nil {
+		fmt.Printf("error json Marshal: %v\n", err)
 		http.Error(w, "failed to parse request body", http.StatusBadRequest)
 		return
 	}
 	err = json.Unmarshal(bytes, &req)
 	if err != nil {
+		fmt.Printf("error json Unmarshal: %v\n", err)
 		http.Error(w, "failed to parse request body", http.StatusBadRequest)
 		return
 	}

@@ -29,7 +29,7 @@ func (mr *patientRepo) CreatePatient(ctx context.Context, sub string, patient en
 	defer tx.Rollback(ctx)
 
 	q := `INSERT INTO patients (user_id, identity_number, phone_number, name, birth_date, gender, identity_card_scan_img, created_at)
-	VALUES ( $1, $2, $3, $3, $4, $5, $6, $7, EXTRACT(EPOCH FROM now())::bigint) RETURNING id`
+	VALUES ( $1, $2, $3, $4, $5, $6, $7, EXTRACT(EPOCH FROM now())::bigint) RETURNING id`
 
 	var id string
 	err = tx.QueryRow(ctx, q, sub,

@@ -32,6 +32,7 @@ func (h *Handler) registRoute() {
 	userH := newUserHandler(h.service.User)
 	patientH := newPatientHandler(h.service.Patient)
 	recordH := newRecordHandler(h.service.Record)
+	fileH := newFileHandler(h.cfg)
 
 	r.Use(middleware.RedirectSlashes)
 
@@ -55,5 +56,7 @@ func (h *Handler) registRoute() {
 		r.Get("/v1/medical/patient", patientH.GetPatient)
 		r.Post("/v1/medical/record", recordH.AddRecord)
 		r.Get("/v1/medical/record", recordH.GetRecord)
+
+		r.Post("/v1/image", fileH.Upload)
 	})
 }
