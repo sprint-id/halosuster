@@ -24,7 +24,8 @@ FROM alpine:3.19
 
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+# WORKDIR /root/
+WORKDIR /app
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/main .
@@ -42,4 +43,5 @@ EXPOSE 8080
 RUN ldd main && file main
 
 # Run the executable with more logging
-CMD ["sh", "-c", "ls -l /root && ./main"]
+CMD ["sh", "-c", "ls -l /app && ./main"]
+# CMD ["sh", "-c", "ls -l /root && ./main"]
