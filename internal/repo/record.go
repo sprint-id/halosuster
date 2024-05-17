@@ -69,7 +69,7 @@ func (cr *recordRepo) AddRecord(ctx context.Context, sub string, record entity.R
 func (cr *recordRepo) GetRecord(ctx context.Context, param dto.ParamGetRecord, sub string) ([]dto.ResGetRecord, error) {
 	var query strings.Builder
 
-	query.WriteString("SELECT patien_id, user_id, symptoms, medications, created_at FROM medical_records WHERE 1=1 ")
+	query.WriteString("SELECT patient_identifier, user_id, symptoms, medications, created_at FROM medical_records WHERE 1=1 ")
 
 	// param id
 	if param.ID != "" {
@@ -124,11 +124,11 @@ func (cr *recordRepo) GetRecord(ctx context.Context, param dto.ParamGetRecord, s
 	for rows.Next() {
 		var identityCardScanImg sql.NullString
 		var createdAt int64
-		var patientId, userId string
+		var patientIdentifierInRecord, userId string
 
 		result := dto.ResGetRecord{}
 		err := rows.Scan(
-			&patientId,
+			&patientIdentifierInRecord,
 			&userId,
 			&result.Symptoms,
 			&result.Medications,
@@ -138,24 +138,28 @@ func (cr *recordRepo) GetRecord(ctx context.Context, param dto.ParamGetRecord, s
 		}
 
 		patient := dto.ResIdentityDetail{}
+		var patientIdentifierInPatient string
 		// get patient detail
-		q := `SELECT identity_number, phone_number, name, birth_date, gender, identity_card_scan_img FROM patients WHERE id=$1`
+		q := `SELECT identity_number, phone_number, name, birth_date, gender, identity_card_scan_img FROM patients WHERE identity_number=$1`
 
-		err = cr.conn.QueryRow(ctx, q, patientId).Scan(&patient.IdentityNumber, &patient.PhoneNumber, &patient.Name, &patient.BirthDate, &patient.Gender, &patient.IdentityCardScanImg)
+		err = cr.conn.QueryRow(ctx, q, patientIdentifierInRecord).Scan(&patientIdentifierInPatient, &patient.PhoneNumber, &patient.Name, &patient.BirthDate, &patient.Gender, &patient.IdentityCardScanImg)
 		if err != nil {
 			return nil, err
 		}
 
 		// get user detail
 		createdBy := dto.ResCreatedBy{}
+		var nip string
 		q = `SELECT nip, name, id FROM users WHERE id=$1`
 
-		err = cr.conn.QueryRow(ctx, q, userId).Scan(&createdBy.NIP, &createdBy.Name, &createdBy.UserID)
+		err = cr.conn.QueryRow(ctx, q, userId).Scan(&nip, &createdBy.Name, &createdBy.UserID)
 		if err != nil {
 			return nil, err
 		}
 
+		patient.IdentityNumber, _ = strconv.Atoi(patientIdentifierInPatient)
 		patient.IdentityCardScanImg = identityCardScanImg.String
+		createdBy.NIP, _ = strconv.Atoi(nip)
 		result.IdentityDetail = patient
 		result.CreatedBy = createdBy
 		result.CreatedAt = timepkg.TimeToISO8601(time.Unix(createdAt, 0))

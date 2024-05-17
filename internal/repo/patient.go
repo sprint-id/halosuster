@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -79,7 +80,7 @@ func (mr *patientRepo) CreatePatient(ctx context.Context, sub string, patient en
 func (mr *patientRepo) GetPatient(ctx context.Context, param dto.ParamGetPatient, sub string) ([]dto.ResGetPatient, error) {
 	var query strings.Builder
 
-	query.WriteString("SELECT id, identity_number, phone_number, name, birth_date, gender, created_at FROM patients WHERE 1=1 ")
+	query.WriteString("SELECT identity_number, phone_number, name, birth_date, gender, created_at FROM patients WHERE 1=1 ")
 
 	// param identityNumber limit the output based on the user id
 	if param.IdentityNumber != "" {
@@ -109,6 +110,11 @@ func (mr *patientRepo) GetPatient(ctx context.Context, param dto.ParamGetPatient
 		param.Limit = 5
 	}
 
+	query.WriteString(fmt.Sprintf("LIMIT %d OFFSET %d", param.Limit, param.Offset))
+
+	// show query
+	fmt.Println(query.String())
+
 	rows, err := mr.conn.Query(ctx, query.String())
 	if err != nil {
 		return nil, err
@@ -118,11 +124,13 @@ func (mr *patientRepo) GetPatient(ctx context.Context, param dto.ParamGetPatient
 	var patients []dto.ResGetPatient
 	for rows.Next() {
 		var patient dto.ResGetPatient
-		err = rows.Scan(&patient.IdentityNumber, &patient.PhoneNumber, &patient.Name, &patient.BirthDate, &patient.Gender, &patient.CreatedAt)
+		var identityNumber string
+		err = rows.Scan(&identityNumber, &patient.PhoneNumber, &patient.Name, &patient.BirthDate, &patient.Gender, &patient.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
 
+		patient.IdentityNumber, _ = strconv.Atoi(identityNumber)
 		patients = append(patients, patient)
 	}
 

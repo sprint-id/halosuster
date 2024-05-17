@@ -48,7 +48,7 @@ type (
 	}
 
 	ResCreatedBy struct {
-		NIP    string `json:"nip"`
+		NIP    int    `json:"nip"`
 		Name   string `json:"name"`
 		UserID string `json:"userId"`
 	}

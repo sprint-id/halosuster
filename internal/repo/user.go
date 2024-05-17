@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -125,6 +126,9 @@ func (u *userRepo) GetUser(ctx context.Context, param dto.ParamGetUser, sub stri
 
 	query.WriteString(fmt.Sprintf("LIMIT %d OFFSET %d", param.Limit, param.Offset))
 
+	// show query
+	fmt.Println(query.String())
+
 	rows, err := u.conn.Query(ctx, query.String()) // Replace $1 with sub
 	if err != nil {
 		return nil, err
@@ -134,17 +138,19 @@ func (u *userRepo) GetUser(ctx context.Context, param dto.ParamGetUser, sub stri
 	results := make([]dto.ResGetUser, 0, 10)
 	for rows.Next() {
 		var createdAt int64
+		var nip string
 
 		result := dto.ResGetUser{}
 		err := rows.Scan(
 			&result.UserID,
-			&result.NIP,
+			&nip,
 			&result.Name,
 			&createdAt)
 		if err != nil {
 			return nil, err
 		}
 
+		result.NIP, _ = strconv.Atoi(nip)
 		result.CreatedAt = timepkg.TimeToISO8601(time.Unix(createdAt, 0))
 		results = append(results, result)
 	}

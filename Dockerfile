@@ -29,8 +29,17 @@ WORKDIR /root/
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/main .
 
+# Ensure the binary is executable
+RUN chmod +x main
+
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
 # Command to run the executable
-CMD ["./main"]
+# CMD ["./main"]
+
+# Add debug information
+RUN ldd main && file main
+
+# Run the executable with more logging
+CMD ["sh", "-c", "ls -l /root && ./main"]

@@ -175,7 +175,7 @@ func (h *userHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *userHandler) UpdateNurse(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("userId")
+	id := strings.Split(r.URL.Path, "/")[4]
 	fmt.Printf("id: %s\n", id)
 	var req dto.ReqUpdateNurse
 
@@ -197,7 +197,7 @@ func (h *userHandler) UpdateNurse(w http.ResponseWriter, r *http.Request) {
 
 func (h *userHandler) DeleteNurse(w http.ResponseWriter, r *http.Request) {
 	// id := r.PathValue("userId")
-	id := r.URL.Query().Get("userId")
+	id := strings.Split(r.URL.Path, "/")[4]
 	fmt.Printf("id: %s\n", id)
 
 	err := h.userSvc.DeleteNurse(r.Context(), id)
