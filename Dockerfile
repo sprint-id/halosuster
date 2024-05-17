@@ -39,9 +39,6 @@ EXPOSE 8080
 # Command to run the executable
 # CMD ["./main"]
 
-# Add debug information
-RUN ldd main && file main
-
 # Run the executable with more logging
 CMD ["sh", "-c", "ls -l /app && ./main"]
 # CMD ["sh", "-c", "ls -l /root && ./main"]
