@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -37,8 +38,8 @@ func (u *UserService) RegisterIT(ctx context.Context, body dto.ReqRegister) (dto
 
 	// convert int to string
 	nip = strconv.Itoa(body.NIP)
-	// validate nip must 13 characters
-	if len(nip) != 13 {
+	// validate nip must between 13-15 characters
+	if len(nip) < 13 && len(nip) > 15 {
 		return res, ierr.ErrBadRequest
 	}
 	// - first until third digit, should start with `615`
@@ -89,8 +90,17 @@ func (u *UserService) RegisterNurse(ctx context.Context, body dto.ReqRegisterNur
 		return res, ierr.ErrBadRequest
 	}
 
+	// check Image URL if invalid or not complete URL
+	if !isValidURL(body.IdentityCardScanImg) {
+		return res, ierr.ErrBadRequest
+	}
+
 	// convert int to string
 	nip = strconv.Itoa(body.NIP)
+	// validate nip must between 13-15 characters
+	if len(nip) < 13 && len(nip) > 15 {
+		return res, ierr.ErrBadRequest
+	}
 	// - first until third digit, should start with `303`
 	if nip[:3] != "303" {
 		return res, ierr.ErrBadRequest
@@ -218,13 +228,40 @@ func (u *UserService) GetUser(ctx context.Context, param dto.ParamGetUser, sub s
 	return res, nil
 }
 
-func (u *UserService) UpdateNurse(ctx context.Context, body dto.ReqUpdateNurse, sub string) error {
+func (u *UserService) UpdateNurse(ctx context.Context, body dto.ReqUpdateNurse, id string) error {
+	var nip string
 	err := u.validator.Struct(body)
 	if err != nil {
 		return ierr.ErrBadRequest
 	}
 
-	err = u.repo.User.UpdateNurse(ctx, body, sub)
+	// convert int to string
+	nip = strconv.Itoa(body.NIP)
+	// validate nip must between 13-15 characters
+	if len(nip) < 13 && len(nip) > 15 {
+		return ierr.ErrBadRequest
+	}
+	// - first until third digit, should start with `303`
+	if nip[:3] != "303" {
+		return ierr.ErrBadRequest
+	}
+	// - the fourth digit, if it's male, fill it with `1`, else `2`
+	if nip[3] != '1' && nip[3] != '2' {
+		return ierr.ErrBadRequest
+	}
+	// - the fifth and ninth digit, fill it with a year, starts from `2000` till current year
+	currentYear := time.Now().Year()
+	year, err := strconv.Atoi(nip[4:8])
+	if err != nil || year < 2000 || year > currentYear {
+		return ierr.ErrBadRequest
+	}
+	// - the tenth and twelfth, fill it with month, starts from `01` till `12`
+	month, err := strconv.Atoi(nip[8:10])
+	if err != nil || month < 1 || month > 12 {
+		return ierr.ErrBadRequest
+	}
+
+	err = u.repo.User.UpdateNurse(ctx, body, id)
 	return err
 }
 
@@ -262,4 +299,11 @@ func (u *UserService) UpdateAccount(ctx context.Context, body dto.ReqUpdateAccou
 
 	err = u.repo.User.UpdateAccount(ctx, sub, body.Name, body.ImageURL)
 	return err
+}
+
+func isValidURL(urlString string) bool {
+	// url validation using regex
+	fmt.Printf("urlString: %s\n", urlString)
+	regex := regexp.MustCompile(`^(https?|ftp)://[^/\s]+\.[^/\s]+(?:/.*)?(?:\.[^/\s]+)?$`)
+	return regex.MatchString(urlString)
 }

@@ -38,7 +38,4 @@ EXPOSE 8080
 
 # Command to run the executable
 # CMD ["./main"]
-
-# Run the executable with more logging
-CMD ["sh", "-c", "ls -l /app && ./main"]
-# CMD ["sh", "-c", "ls -l /root && ./main"]
+CMD ["/app/main"]

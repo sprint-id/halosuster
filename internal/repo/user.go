@@ -158,10 +158,14 @@ func (u *userRepo) GetUser(ctx context.Context, param dto.ParamGetUser, sub stri
 	return results, nil
 }
 
-func (u *userRepo) UpdateNurse(ctx context.Context, body dto.ReqUpdateNurse, sub string) error {
+func (u *userRepo) UpdateNurse(ctx context.Context, body dto.ReqUpdateNurse, id string) error {
+	var nip string
 	q := `UPDATE users SET nip = $1, name = $2 WHERE id = $3`
+
+	// convert nip to string
+	nip = strconv.Itoa(body.NIP)
 	_, err := u.conn.Exec(ctx, q,
-		body.NIP, body.Name, sub)
+		nip, body.Name, id)
 
 	if err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
