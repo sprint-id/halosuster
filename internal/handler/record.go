@@ -41,7 +41,7 @@ func (h *recordHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the payload is empty
 	if len(jsonData) == 0 {
-		http.Error(w, "empty payload", http.StatusUnauthorized)
+		http.Error(w, "empty payload", http.StatusBadRequest)
 		return
 	}
 

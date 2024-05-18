@@ -36,6 +36,15 @@ RUN chmod +x main
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
+ENV DB_HOST=
+ENV DB_PORT=
+ENV DB_USER=
+ENV DB_PASSWORD=
+ENV DB_NAME=
+ENV DB_PARAMS=sslmode=disable
+ENV JWT_SECRET=
+ENV BCRYPT_SALT=
+
 # Command to run the executable
 # CMD ["./main"]
 CMD ["/app/main"]

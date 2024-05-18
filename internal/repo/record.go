@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sprint-id/eniqilo-server/internal/dto"
 	"github.com/sprint-id/eniqilo-server/internal/entity"
+	"github.com/sprint-id/eniqilo-server/internal/ierr"
 	timepkg "github.com/sprint-id/eniqilo-server/pkg/time"
 )
 
@@ -29,42 +30,33 @@ func newRecordRepo(conn *pgxpool.Pool) *recordRepo {
 // }
 
 func (cr *recordRepo) AddRecord(ctx context.Context, sub string, record entity.Record) error {
+	// check if identity number is exist
+	qCheck := `SELECT COUNT(*) FROM patients WHERE identity_number=$1`
+	var count int
+
+	err := cr.conn.QueryRow(ctx, qCheck, record.IdentityNumber).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	// check if identity number is exist, if not exist, return error bad request
+	if count == 0 {
+		return ierr.ErrBadRequest
+	}
+
 	// add record
 	q := `INSERT INTO medical_records (user_id, patient_identifier, symptoms, medications, created_at)
 	VALUES ( $1, $2, $3, $4, EXTRACT(EPOCH FROM now())::bigint) RETURNING id`
 
 	var id string
-	err := cr.conn.QueryRow(ctx, q, sub, record.IdentityNumber, record.Symptoms, record.Medications).Scan(&id)
+	err = cr.conn.QueryRow(ctx, q, sub, record.IdentityNumber, record.Symptoms, record.Medications).Scan(&id)
 	if err != nil {
+		fmt.Printf("error query: %v\n", err)
 		return err
 	}
 
 	return nil
 }
-
-// {
-// 	"message": "success",
-// 	"data": [ // ordered by newest first
-// 		{
-// 			"identityDetail:": {
-// 				"identityNumber": 123123, // not null, should be 16 digit
-// 				"phoneNumber": "+62123123123",
-// 				"name": "",
-// 				"birthDate" : "",
-// 				"gender" : "",
-// 				"identityCardScanImg": ""
-// 			},
-// 			"symptoms": "", // not null, minLength 1, maxLength 2000,
-// 			"medications" : "" // not null, minLength 1, maxLength 2000
-// 			"createdAt": "", // should in ISO 8601 format
-// 			"createdBy": {
-// 					"nip": 6152200102987,
-// 					"name": "name",
-// 					"userId": ""
-// 			}
-// 		}
-// 	]
-// }
 
 func (cr *recordRepo) GetRecord(ctx context.Context, param dto.ParamGetRecord, sub string) ([]dto.ResGetRecord, error) {
 	var query strings.Builder

@@ -33,6 +33,7 @@ CREATE INDEX idx_users_nip ON users (nip);
 CREATE INDEX idx_users_id ON users (id);
 CREATE INDEX idx_patients_id ON patients (id);
 CREATE INDEX idx_patients_user_id ON patients (user_id);
+CREATE INDEX idx_patients_identity_number ON patients (identity_number);
 CREATE INDEX idx_medical_records_id ON medical_records (id);
 CREATE INDEX idx_medical_records_user_id ON medical_records (user_id);
 CREATE INDEX idx_medical_records_patient_identifier ON medical_records (patient_identifier);

@@ -160,11 +160,26 @@ func (u *userRepo) GetUser(ctx context.Context, param dto.ParamGetUser, sub stri
 
 func (u *userRepo) UpdateNurse(ctx context.Context, body dto.ReqUpdateNurse, id string) error {
 	var nip string
-	q := `UPDATE users SET nip = $1, name = $2 WHERE id = $3`
+
+	// validate nip exists must prefix with 303
+	q := `SELECT 1 FROM users WHERE id = $1 AND LEFT(nip, 3) = '303'`
+	v := 0
+	err := u.conn.QueryRow(ctx, q, id).Scan(&v)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return ierr.ErrNotFound
+		}
+		return err
+	}
+
+	q = `UPDATE users SET nip = $1, name = $2 WHERE id = $3`
+	// q := `WITH existing_nurse AS ( SELECT nip FROM users WHERE id = $3 )
+	// 	UPDATE users SET nip = $1, name = $2 WHERE id = $3
+	// 	AND (SELECT LEFT(nip, 3) FROM existing_nurse) = '303'`
 
 	// convert nip to string
 	nip = strconv.Itoa(body.NIP)
-	_, err := u.conn.Exec(ctx, q,
+	_, err = u.conn.Exec(ctx, q,
 		nip, body.Name, id)
 
 	if err != nil {
@@ -180,8 +195,19 @@ func (u *userRepo) UpdateNurse(ctx context.Context, body dto.ReqUpdateNurse, id 
 }
 
 func (u *userRepo) DeleteNurse(ctx context.Context, id string) error {
-	q := `DELETE FROM users WHERE id = $1`
-	_, err := u.conn.Exec(ctx, q, id)
+	// validate nip exists must prefix with 303
+	q := `SELECT 1 FROM users WHERE id = $1 AND LEFT(nip, 3) = '303'`
+	v := 0
+	err := u.conn.QueryRow(ctx, q, id).Scan(&v)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return ierr.ErrNotFound
+		}
+		return err
+	}
+
+	q = `DELETE FROM users WHERE id = $1`
+	_, err = u.conn.Exec(ctx, q, id)
 
 	if err != nil {
 		return err
@@ -202,91 +228,15 @@ func (u *userRepo) AccessNurse(ctx context.Context, password, id string) error {
 	return nil
 }
 
-func (u *userRepo) LookUp(ctx context.Context, id string) error {
-	q := `SELECT 1 FROM users WHERE id = $1`
+func (u *userRepo) CountNIP(ctx context.Context, nip string) (int, error) {
+	q := `SELECT COUNT(1) FROM users WHERE nip = $1`
 
-	v := 0
-	err := u.conn.QueryRow(ctx,
-		q, id).Scan(&v)
-
-	if err != nil {
-		if err.Error() == "no rows in result set" {
-			return ierr.ErrNotFound
-		}
-		return err
-	}
-
-	return nil
-}
-
-func (u *userRepo) UpdateAccount(ctx context.Context, id, name, url string) error {
-	q := `UPDATE users SET image_url = $1, name = $2 WHERE id = $3`
-	_, err := u.conn.Exec(ctx, q,
-		url, name, id)
+	var count int
+	err := u.conn.QueryRow(ctx, q, nip).Scan(&count)
 
 	if err != nil {
-		if pgErr, ok := err.(*pgconn.PgError); ok {
-			if pgErr.Code == "23505" {
-				return ierr.ErrDuplicate
-			}
-		}
-		return err
+		return 0, err
 	}
 
-	return nil
+	return count, nil
 }
-
-func (u *userRepo) GetNameBySub(ctx context.Context, id string) (string, error) {
-	q := `SELECT name FROM users WHERE id = $1`
-
-	v := ""
-	err := u.conn.QueryRow(ctx,
-		q, id).Scan(&v)
-
-	if err != nil {
-		if err.Error() == "no rows in result set" {
-			return "", ierr.ErrNotFound
-		}
-		return "", err
-	}
-
-	return v, nil
-}
-
-func (u *userRepo) GetEmailBySub(ctx context.Context, id string) (string, error) {
-	q := `SELECT email FROM users WHERE id = $1`
-
-	v := ""
-	err := u.conn.QueryRow(ctx,
-		q, id).Scan(&v)
-
-	if err != nil {
-		if err.Error() == "no rows in result set" {
-			return "", ierr.ErrNotFound
-		}
-		return "", err
-	}
-
-	return v, nil
-}
-
-// func (u *userRepo) GetNameByID(ctx context.Context, id string) (string, error) {
-// 	name := ""
-// 	err := u.conn.QueryRow(ctx,
-// 		`SELECT name FROM users
-// 		WHERE id = $1`,
-// 		id).Scan(&name)
-// 	if err != nil {
-// 		if err.Error() == "no rows in result set" {
-// 			return "", ierr.ErrNotFound
-// 		}
-// 		if pgErr, ok := err.(*pgconn.PgError); ok {
-// 			if pgErr.Code == "22P02" {
-// 				return "", ierr.ErrNotFound
-// 			}
-// 		}
-// 		return "", err
-// 	}
-
-// 	return name, nil
-// }

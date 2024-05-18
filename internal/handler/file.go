@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/sprint-id/eniqilo-server/internal/cfg"
 	"github.com/sprint-id/eniqilo-server/internal/dto"
+	response "github.com/sprint-id/eniqilo-server/pkg/resp"
 )
 
 type fileHandler struct {
@@ -78,8 +79,12 @@ func (h *fileHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		ImageUrl: fmt.Sprintf("https://%s.s3.amazonaws.com/%s", h.cfg.S3BucketName, fileName),
 	}
 
+	successRes := response.SuccessReponse{}
+	successRes.Message = "success"
+	successRes.Data = res
+
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(res)
+	err = json.NewEncoder(w).Encode(successRes)
 	if err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 		return

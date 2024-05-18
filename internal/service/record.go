@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/sprint-id/eniqilo-server/internal/cfg"
@@ -31,6 +32,12 @@ func (u *RecordService) AddRecord(ctx context.Context, body dto.ReqAddRecord, su
 	err := u.validator.Struct(body)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
+		return ierr.ErrBadRequest
+	}
+
+	// validate identity number must 16 digit
+	identityNumber := strconv.Itoa(body.IdentityNumber)
+	if len(identityNumber) != 16 {
 		return ierr.ErrBadRequest
 	}
 

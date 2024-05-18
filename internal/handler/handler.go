@@ -45,7 +45,6 @@ func (h *Handler) registRoute() {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator(tokenAuth))
 
-		r.Patch("/v1/user", userH.UpdateAccount)
 		r.Post("/v1/user/nurse/register", userH.RegisterNurse)
 		r.Get("/v1/user", userH.GetUser)
 		r.Put("/v1/user/nurse/{userId}", userH.UpdateNurse)

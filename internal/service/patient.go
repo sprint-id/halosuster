@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/sprint-id/eniqilo-server/internal/cfg"
@@ -23,6 +24,16 @@ func newPatientService(repo *repo.Repo, validator *validator.Validate, cfg *cfg.
 func (u *PatientService) CreatePatient(ctx context.Context, body dto.ReqCreatePatient, sub string) error {
 	err := u.validator.Struct(body)
 	if err != nil {
+		return ierr.ErrBadRequest
+	}
+
+	identityNumber := strconv.Itoa(body.IdentityNumber)
+	if len(identityNumber) != 16 {
+		return ierr.ErrBadRequest
+	}
+
+	// check Image URL if invalid or not complete URL
+	if !isValidURL(body.IdentityCardScanImg) {
 		return ierr.ErrBadRequest
 	}
 

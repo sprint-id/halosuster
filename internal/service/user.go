@@ -232,18 +232,30 @@ func (u *UserService) UpdateNurse(ctx context.Context, body dto.ReqUpdateNurse, 
 	var nip string
 	err := u.validator.Struct(body)
 	if err != nil {
+		fmt.Printf("error: %v\n", err)
 		return ierr.ErrBadRequest
 	}
 
 	// convert int to string
 	nip = strconv.Itoa(body.NIP)
 	// validate nip must between 13-15 characters
-	if len(nip) < 13 && len(nip) > 15 {
+	if len(nip) < 13 || len(nip) > 15 {
 		return ierr.ErrBadRequest
 	}
+	// check if nip is exist
+	var count int
+	count, err = u.repo.User.CountNIP(ctx, nip)
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return ierr.ErrDuplicate
+	}
+
 	// - first until third digit, should start with `303`
 	if nip[:3] != "303" {
-		return ierr.ErrBadRequest
+		return ierr.ErrNotFound
 	}
 	// - the fourth digit, if it's male, fill it with `1`, else `2`
 	if nip[3] != '1' && nip[3] != '2' {
@@ -279,25 +291,6 @@ func (u *UserService) AccessNurse(ctx context.Context, body dto.ReqAccessNurse, 
 	password := auth.HashPassword(body.Password, u.cfg.BCryptSalt)
 
 	err = u.repo.User.AccessNurse(ctx, password, id)
-	return err
-}
-
-func (u *UserService) UpdateAccount(ctx context.Context, body dto.ReqUpdateAccount, sub string) error {
-	err := u.validator.Struct(body)
-	if err != nil {
-		return ierr.ErrBadRequest
-	}
-
-	if body.ImageURL == "http://incomplete" {
-		return ierr.ErrBadRequest
-	}
-
-	err = u.repo.User.LookUp(ctx, sub)
-	if err != nil {
-		return err
-	}
-
-	err = u.repo.User.UpdateAccount(ctx, sub, body.Name, body.ImageURL)
 	return err
 }
 
