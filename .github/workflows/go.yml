@@ -13,9 +13,9 @@ env:
   ECR_REPOSITORY: syarif_04-repository           # set this to your Amazon ECR repository name
   ECS_SERVICE: projectsprint-syarif_04-service                 # set this to your Amazon ECS service name
   ECS_CLUSTER: projectsprint-cluster                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: projectsprint-syarif_04-task-definition # set this to the path to your Amazon ECS task definition
+  ECS_TASK_DEFINITION: arn:aws:ecs:ap-southeast-1:560918124458:task-definition/projectsprint-syarif_04-task-definition:3 # set this to the path to your Amazon ECS task definition
                                                 # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: projectsprint-syarif_04-container           # set this to the name of the container in the
+  CONTAINER_NAME: syarif_04-container           # set this to the name of the container in the
                                                 # containerDefinitions section of your task definition
 
 jobs:
