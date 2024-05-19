@@ -22,7 +22,7 @@ RUN go build -o main ./cmd/main.go
 # Step 2: Use a minimal base image to run the application
 FROM alpine:latest  
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates bash
 
 # WORKDIR /root/
 WORKDIR /app
