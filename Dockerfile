@@ -47,5 +47,6 @@ ENV BCRYPT_SALT=
 
 # Command to run the executable
 # CMD ["./main"]
-CMD ["/app/main"]
+# CMD ["/app/main"]
+CMD ["sh", "-c", "ls -l /app && ./main"]
 # ENTRYPOINT ["./main"]
