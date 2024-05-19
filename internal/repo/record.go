@@ -41,7 +41,7 @@ func (cr *recordRepo) AddRecord(ctx context.Context, sub string, record entity.R
 
 	// check if identity number is exist, if not exist, return error bad request
 	if count == 0 {
-		return ierr.ErrBadRequest
+		return ierr.ErrNotFound
 	}
 
 	// add record
