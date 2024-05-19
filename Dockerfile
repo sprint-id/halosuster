@@ -14,7 +14,8 @@ RUN go mod download
 COPY . .
 
 ENV GOARCH=amd64
-ENV GOOS=linux 
+ENV GOOS=linux
+ENV CGO_ENABLED=0 
 
 # Build the Go app
 RUN go build -o main ./cmd/main.go
