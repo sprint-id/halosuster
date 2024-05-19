@@ -15,6 +15,7 @@ COPY . .
 
 ENV GOARCH=amd64
 ENV GOOS=linux
+# CGO has to be disabled for alpine
 ENV CGO_ENABLED=0 
 
 # Build the Go app
@@ -47,7 +48,4 @@ ENV JWT_SECRET=
 ENV BCRYPT_SALT=
 
 # Command to run the executable
-# CMD ["./main"]
 CMD ["/app/main"]
-# CMD ["sh", "-c", "ls -l /app && ./main"]
-# ENTRYPOINT ["./main"]
