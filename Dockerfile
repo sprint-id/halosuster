@@ -1,8 +1,6 @@
 # Step 1: Build the binary
 FROM golang:1.22 as builder
 
-RUN apk update && apk add --no-cache git
-
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
@@ -24,7 +22,7 @@ RUN go build -o main ./cmd/main.go
 # Step 2: Use a minimal base image to run the application
 FROM alpine:latest  
 
-# RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates
 
 # WORKDIR /root/
 WORKDIR /app
