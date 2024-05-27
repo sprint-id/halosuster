@@ -3,7 +3,7 @@ module github.com/sprint-id/eniqilo-server
 go 1.21.6
 
 require (
-	github.com/aws/aws-sdk-go v1.53.4
+	github.com/aws/aws-sdk-go v1.53.10
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-chi/jwtauth/v5 v5.3.1
