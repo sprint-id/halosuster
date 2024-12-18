@@ -4,7 +4,7 @@ go 1.21.6
 
 require (
 	github.com/aws/aws-sdk-go v1.53.4
-	github.com/go-chi/chi v1.5.5
+	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-chi/jwtauth/v5 v5.3.1
 	github.com/go-playground/validator/v10 v10.19.0
